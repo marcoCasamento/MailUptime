@@ -1,0 +1,6 @@
+@MailUptime_HostAddress = http://localhost:5134
+
+GET {{MailUptime_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

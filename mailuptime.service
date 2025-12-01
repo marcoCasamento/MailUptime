@@ -1,0 +1,16 @@
+[Unit]
+Description=Mail Monitor Service
+After=network.target
+
+[Service]
+Type=notify
+WorkingDirectory=/opt/MailUptime
+ExecStart=/usr/bin/dotnet /opt/MailUptime/MailUptime.dll
+Restart=always
+RestartSec=10
+User=MailUptime
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+[Install]
+WantedBy=multi-user.target

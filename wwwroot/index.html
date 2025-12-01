@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+    MailUptime Dashboard
+    
+    Features:
+    - Real-time status monitoring for all configured mailboxes
+    - Auto-refresh every 30 seconds
+    - Mobile-friendly responsive design
+    - Dark mode interface
+    - Visual indicators for mail receipt and pattern matching
+    - Human-readable timestamps
+    
+    The dashboard automatically fetches data from /api/dashboard/mailboxes
+    and displays status cards for each configured mailbox.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailUptime Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4f46e5;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #475569;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a2332 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        h1 svg {
+            flex-shrink: 0;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .refresh-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .refresh-info span {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .refresh-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .refresh-btn:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+        }
+
+        .mailbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .mailbox-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mailbox-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #818cf8);
+        }
+
+        .mailbox-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        .mailbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .mailbox-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .status-badge.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .status-badge.warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
+        .info-section {
+            margin-bottom: 16px;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .info-value.time {
+            font-family: 'Courier New', monospace;
+            color: var(--text-secondary);
+        }
+
+        .check-items {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .check-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .check-icon.success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .check-icon.error {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .check-icon.warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .check-icon.na {
+            background: var(--text-muted);
+            color: white;
+        }
+
+        .check-text {
+            flex: 1;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--error-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            color: var(--error-color);
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--bg-card);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .sender-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .sender-tag {
+            background: var(--bg-card);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .mailbox-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .refresh-info {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .mailbox-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .status-badge {
+                align-self: flex-start;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 12px;
+            }
+
+            .mailbox-card {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                    <path d="M22 17H2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2z"></path>
+                    <path d="M22 17V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10"></path>
+                    <path d="M10 12l2 2 2-2"></path>
+                    <path d="M6 7l6 4 6-4"></path>
+                </svg>
+                MailUptime Dashboard
+            </h1>
+            <p class="subtitle">Real-time mailbox monitoring status</p>
+        </header>
+
+        <div class="refresh-info">
+            <span id="lastUpdate">Loading...</span>
+            <button class="refresh-btn" onclick="loadMailboxes()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                </svg>
+                Refresh
+            </button>
+        </div>
+
+        <div id="mailboxContainer" class="mailbox-grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading mailbox statuses...</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>MailUptime Dashboard • Auto-refresh every 30 seconds</p>
+        </footer>
+    </div>
+
+    <script>
+        let autoRefreshInterval;
+
+        function formatDateTime(dateString) {
+            if (!dateString) return 'Never';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            
+            return date.toLocaleString();
+        }
+
+        function getStatusBadge(mailbox) {
+            if (mailbox.error) {
+                return '<span class="status-badge error">Error</span>';
+            }
+            
+            // Red badge: Pattern matched but failed
+            if (mailbox.patternMatched && mailbox.failPatternMatched) {
+                return '<span class="status-badge error">✗ Failed</span>';
+            }
+            
+            // Green badge: Pattern matched and no failure
+            if (mailbox.patternMatched) {
+                return '<span class="status-badge success">✓ OK</span>';
+            }
+            
+            // Yellow badge: Pattern not matched yet
+            return '<span class="status-badge warning">⏳ Pending</span>';
+        }
+
+        function getCheckIcon(status) {
+            if (status === true) return '<div class="check-icon success">✓</div>';
+            if (status === false) return '<div class="check-icon warning">⏳</div>';
+            return '<div class="check-icon na">○</div>';
+        }
+
+        function renderMailbox(mailbox) {
+            const hasSenders = mailbox.hasSenderConfiguration && mailbox.expectedSenders.length > 0;
+            const sendersHtml = hasSenders ? `
+                <div class="sender-list">
+                    ${mailbox.expectedSenders.map(sender => 
+                        `<span class="sender-tag">${sender}</span>`
+                    ).join('')}
+                </div>
+            ` : '';
+
+            const errorHtml = mailbox.error ? `
+                <div class="error-message">
+                    <strong>Error:</strong> ${mailbox.error}
+                </div>
+            ` : '';
+
+            return `
+                <div class="mailbox-card">
+                    <div class="mailbox-header">
+                        <h2 class="mailbox-name">${mailbox.name}</h2>
+                        ${getStatusBadge(mailbox)}
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-label">Last Check</div>
+                        <div class="info-value time">${formatDateTime(mailbox.lastChecked)}</div>
+                    </div>
+
+                    ${mailbox.lastReceivedDate ? `
+                        <div class="info-section">
+                            <div class="info-label">Last Received</div>
+                            <div class="info-value time">${formatDateTime(mailbox.lastReceivedDate)}</div>
+                        </div>
+                    ` : ''}
+
+                    ${mailbox.lastMatchedSubject ? `
+                        <div class="info-section">
+                            <div class="info-label">Last Subject</div>
+                            <div class="info-value">${mailbox.lastMatchedSubject}</div>
+                        </div>
+                    ` : ''}
+
+                    ${mailbox.failPatternMatched && mailbox.lastFailedSubject ? `
+                        <div class="info-section">
+                            <div class="info-label" style="color: var(--error-color);">⚠ Failed Report Subject</div>
+                            <div class="info-value" style="color: var(--error-color);">${mailbox.lastFailedSubject}</div>
+                        </div>
+                    ` : ''}
+
+                    ${hasSenders ? `
+                        <div class="info-section">
+                            <div class="info-label">Expected Senders</div>
+                            ${sendersHtml}
+                        </div>
+                    ` : ''}
+
+                    <div class="check-items">
+                        ${mailbox.patternMatched ? `
+                            <div class="check-item">
+                                ${getCheckIcon(true)}
+                                <span class="check-text">Report Received</span>
+                            </div>
+                        ` : `
+                            <div class="check-item">
+                                ${getCheckIcon(false)}
+                                <span class="check-text">Report not yet received</span>
+                            </div>
+                        `}
+                        
+                        ${mailbox.failPatternMatched ? `
+                            <div class="check-item">
+                                ${getCheckIcon(true)}
+                                <span class="check-text" style="color: var(--error-color); font-weight: 600;">⚠ Failing Report Received</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${errorHtml}
+                    
+                    ${mailbox.failPatternMatched ? `
+                        <div class="error-message" style="background: rgba(239, 68, 68, 0.15); border-color: var(--error-color);">
+                            <strong>⚠ Failure Detected:</strong> This report contains failure patterns indicating an issue that needs attention.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function loadMailboxes() {
+            const container = document.getElementById('mailboxContainer');
+            
+            try {
+                const response = await fetch('/api/dashboard/mailboxes');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const mailboxes = await response.json();
+                
+                if (mailboxes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg class="empty-state-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 20px; opacity: 0.5;">
+                                <path d="M22 17H2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2z"></path>
+                                <path d="M22 17V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10"></path>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                            </svg>
+                            <h3>No mailboxes configured</h3>
+                            <p>Add mailboxes in your appsettings.json to start monitoring</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = mailboxes.map(renderMailbox).join('');
+                }
+                
+                document.getElementById('lastUpdate').textContent = 
+                    `Last updated: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('Error loading mailboxes:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-state-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="margin: 0 auto 20px; opacity: 0.8;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <h3>Failed to load mailboxes</h3>
+                        <p>${error.message}</p>
+                        <button class="refresh-btn" onclick="loadMailboxes()" style="margin-top: 20px;">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Initial load
+        loadMailboxes();
+
+        // Auto-refresh every 30 seconds
+        autoRefreshInterval = setInterval(loadMailboxes, 30000);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>
