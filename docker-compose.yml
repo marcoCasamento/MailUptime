@@ -1,0 +1,23 @@
+services:
+  mailuptime:
+    image: mcasamento/mailuptime:latest
+    container_name: mailuptime
+    ports:
+      - "5000:8080"
+    volumes:
+      # Externalize appsettings.json configuration
+      - ./config/appsettings.json:/app/appsettings.json:ro
+      # Externalize SQLite database
+      - ./data:/app/data
+    environment:
+      # Override database path to use external volume
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/dashboard/mailboxes"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -1,0 +1,198 @@
+# Docker Compose Configuration Examples
+# Choose the appropriate example based on your needs
+
+# =============================================================================
+# EXAMPLE 1: Basic Setup (Recommended for most users)
+# =============================================================================
+# Uses externalized config and database in separate directories
+# Configuration: ./config/appsettings.json
+# Database: ./data/MailUptime.db
+
+version: '3.8'
+
+services:
+  mailuptime:
+    image: mcasamento/mailuptime:latest
+    container_name: mailuptime
+    ports:
+      - "5000:8080"
+    volumes:
+      - ./config/appsettings.json:/app/appsettings.json:ro
+      - ./data:/app/data
+    environment:
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/dashboard/mailboxes"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# =============================================================================
+# EXAMPLE 2: With Resource Limits
+# =============================================================================
+# Limits CPU and memory usage to prevent resource exhaustion
+
+# version: '3.8'
+# 
+# services:
+#   mailuptime:
+#     image: mcasamento/mailuptime:latest
+#     container_name: mailuptime
+#     ports:
+#       - "5000:8080"
+#     volumes:
+#       - ./config/appsettings.json:/app/appsettings.json:ro
+#       - ./data:/app/data
+#     environment:
+#       - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+#       - ASPNETCORE_ENVIRONMENT=Production
+#     restart: unless-stopped
+#     deploy:
+#       resources:
+#         limits:
+#           cpus: '0.5'
+#           memory: 512M
+#         reservations:
+#           cpus: '0.25'
+#           memory: 256M
+
+# =============================================================================
+# EXAMPLE 3: Multiple Instances (Production + Staging)
+# =============================================================================
+# Run multiple isolated instances with separate configs and databases
+
+# version: '3.8'
+# 
+# services:
+#   mailuptime-prod:
+#     image: mcasamento/mailuptime:latest
+#     container_name: mailuptime-prod
+#     ports:
+#       - "5000:8080"
+#     volumes:
+#       - ./config/prod/appsettings.json:/app/appsettings.json:ro
+#       - ./data/prod:/app/data
+#     environment:
+#       - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+#       - ASPNETCORE_ENVIRONMENT=Production
+#     restart: unless-stopped
+# 
+#   mailuptime-staging:
+#     image: mcasamento/mailuptime:latest
+#     container_name: mailuptime-staging
+#     ports:
+#       - "5001:8080"
+#     volumes:
+#       - ./config/staging/appsettings.json:/app/appsettings.json:ro
+#       - ./data/staging:/app/data
+#     environment:
+#       - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+#       - ASPNETCORE_ENVIRONMENT=Staging
+#     restart: unless-stopped
+
+# =============================================================================
+# EXAMPLE 4: With External Network (for Uptime Kuma integration)
+# =============================================================================
+# Connect to existing monitoring network
+
+# version: '3.8'
+# 
+# networks:
+#   monitoring:
+#     external: true
+# 
+# services:
+#   mailuptime:
+#     image: mcasamento/mailuptime:latest
+#     container_name: mailuptime
+#     networks:
+#       - monitoring
+#     ports:
+#       - "5000:8080"
+#     volumes:
+#       - ./config/appsettings.json:/app/appsettings.json:ro
+#       - ./data:/app/data
+#     environment:
+#       - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+#     restart: unless-stopped
+
+# =============================================================================
+# EXAMPLE 5: With Logging Configuration
+# =============================================================================
+# Configure custom logging driver and options
+
+# version: '3.8'
+# 
+# services:
+#   mailuptime:
+#     image: mcasamento/mailuptime:latest
+#     container_name: mailuptime
+#     ports:
+#       - "5000:8080"
+#     volumes:
+#       - ./config/appsettings.json:/app/appsettings.json:ro
+#       - ./data:/app/data
+#       - ./logs:/app/logs
+#     environment:
+#       - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+#       - ASPNETCORE_ENVIRONMENT=Production
+#     restart: unless-stopped
+#     logging:
+#       driver: "json-file"
+#       options:
+#         max-size: "10m"
+#         max-file: "3"
+
+# =============================================================================
+# EXAMPLE 6: Specific Version Pin
+# =============================================================================
+# Pin to a specific version instead of using 'latest'
+
+# version: '3.8'
+# 
+# services:
+#   mailuptime:
+#     image: mcasamento/mailuptime:v1.0.0  # Pin to specific version
+#     container_name: mailuptime
+#     ports:
+#       - "5000:8080"
+#     volumes:
+#       - ./config/appsettings.json:/app/appsettings.json:ro
+#       - ./data:/app/data
+#     environment:
+#       - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+#     restart: unless-stopped
+
+# =============================================================================
+# EXAMPLE 7: Behind Reverse Proxy (Traefik)
+# =============================================================================
+# Automatic SSL with Traefik and Let's Encrypt
+
+# version: '3.8'
+# 
+# networks:
+#   web:
+#     external: true
+# 
+# services:
+#   mailuptime:
+#     image: mcasamento/mailuptime:latest
+#     container_name: mailuptime
+#     networks:
+#       - web
+#     volumes:
+#       - ./config/appsettings.json:/app/appsettings.json:ro
+#       - ./data:/app/data
+#     environment:
+#       - ConnectionStrings__DefaultConnection=Data Source=/app/data/MailUptime.db
+#     restart: unless-stopped
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.mailuptime.rule=Host(`mailuptime.example.com`)"
+#       - "traefik.http.routers.mailuptime.entrypoints=websecure"
+#       - "traefik.http.routers.mailuptime.tls.certresolver=letsencrypt"
+#       - "traefik.http.services.mailuptime.loadbalancer.server.port=8080"

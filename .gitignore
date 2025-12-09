@@ -48,6 +48,12 @@ appsettings.Development.json
 appsettings.Production.json
 !appsettings.example.json
 
+# Docker Compose externalized directories
+config/appsettings.json
+data/
+!config/.gitkeep
+!data/.gitkeep
+
 # Rider
 .idea/
 

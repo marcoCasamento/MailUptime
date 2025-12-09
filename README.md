@@ -238,28 +238,25 @@ docker build -t mailuptime .
 docker run -p 5000:8080 -v $(pwd)/appsettings.json:/app/appsettings.json mailuptime
 ```
 
-#### Docker Compose
+#### Docker Compose (Recommended)
 
-Create `docker-compose.yml`:
+The easiest way to deploy with externalized configuration and persistent database storage.
 
-```yaml
-version: '3.8'
-services:
-  mailuptime:
-    image: mcasamento/mailuptime:latest
-    ports:
-      - "5000:8080"
-    volumes:
-      - ./appsettings.json:/app/appsettings.json
-      - ./data:/app/data
-    restart: unless-stopped
-```
-
-Run with:
+**Quick start:**
 
 ```bash
+# Configuration is in config/appsettings.json
+# Database will be stored in data/MailUptime.db
 docker-compose up -d
 ```
+
+**Features:**
+- Externalized configuration in `config/appsettings.json`
+- Persistent SQLite database in `data/` directory
+- Automatic health checks
+- Auto-restart on failure
+
+For detailed Docker Compose setup and configuration options, see **[DOCKER_COMPOSE.md](DOCKER_COMPOSE.md)**.
 
 ### Systemd Service (Linux)
 
