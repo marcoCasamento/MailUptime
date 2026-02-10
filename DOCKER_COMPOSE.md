@@ -77,7 +77,15 @@ Edit `config/appsettings.json` with your email credentials:
 
 ### 3. Start the Service
 
+?? **IMPORTANT**: Ensure `config/appsettings.json` exists as a **file** before running docker-compose!
+If the file doesn't exist, Docker will create it as a **directory** which will cause mount errors.
+
 ```bash
+# Verify file exists and is not a directory
+file config/appsettings.json
+# Should output: config/appsettings.json: JSON data
+
+# Start the service
 docker-compose up -d
 ```
 
@@ -380,6 +388,61 @@ docker compose up -d
 ./docker-setup.sh  # Correct
 # sudo ./docker-setup.sh  # Wrong - will create root-owned files
 ```
+
+### Config File Created as Directory
+
+**Symptom:**
+```bash
+ls -la config/
+drwxr-xr-x  2 user user 4096 appsettings.json  # ? It's a directory!
+```
+
+**Cause:** Running `docker compose up` **before** creating the `config/appsettings.json` file causes Docker to create it as a directory instead of waiting for a file.
+
+**Solution:**
+```bash
+# Stop and remove container
+docker compose down
+
+# Remove the directory
+rm -rf config/appsettings.json
+
+# Re-run setup script (creates the file properly)
+./docker-setup.sh
+
+# Or create manually
+cat > config/appsettings.json << 'EOF'
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=/app/data/MailUptime.db"
+  },
+  "MailboxSettings": {
+    "Protocol": "Imap",
+    "Host": "imap.gmail.com",
+    "Port": 993,
+    "UseSsl": true,
+    "Username": "your-email@gmail.com",
+    "Password": "your-app-password",
+    "PollingFrequencySeconds": 60,
+    "ReportConfig": [
+      {
+        "Name": "my-mailbox",
+        "ExpectedSubjectPattern": ".*",
+        "ExpectedBodyPattern": ".*"
+      }
+    ]
+  }
+}
+EOF
+
+# Verify it's a file
+file config/appsettings.json
+
+# Start container
+docker compose up -d
+```
+
+**Prevention:** Always ensure `config/appsettings.json` exists as a **file** before running `docker compose up`!
 
 ### Database Locked Error
 

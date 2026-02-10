@@ -40,7 +40,20 @@ if [ -d "data" ]; then
     sudo chown -R $USER:$USER data 2>/dev/null || chown -R $USER:$USER data
 fi
 
-# Check if config file exists
+# CRITICAL: Check if config file exists as a FILE (not directory!)
+# Docker will create appsettings.json as a DIRECTORY if the file doesn't exist during mount
+if [ -d "config/appsettings.json" ]; then
+    echo "? ERROR: config/appsettings.json is a DIRECTORY!"
+    echo ""
+    echo "This happens when you run 'docker compose up' before creating the config file."
+    echo "Docker creates it as a directory instead of failing."
+    echo ""
+    echo "Fixing the issue..."
+    rm -rf config/appsettings.json
+    echo "? Removed directory config/appsettings.json"
+    echo ""
+fi
+
 if [ -f "config/appsettings.json" ]; then
     echo "? Configuration file found: config/appsettings.json"
 else

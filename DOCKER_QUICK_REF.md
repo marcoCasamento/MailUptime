@@ -97,6 +97,15 @@ docker-compose down  # Keeps data and config
 
 ## Troubleshooting
 
+### Config file created as directory?
+```bash
+# Docker created config/appsettings.json as a folder (happens when file doesn't exist at mount time)
+docker compose down
+rm -rf config/appsettings.json
+./docker-setup.sh  # Recreates it as a file
+docker compose up -d
+```
+
 ### Volume mount error (WSL/Docker Desktop)?
 ```bash
 # Fix file ownership
