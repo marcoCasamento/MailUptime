@@ -97,6 +97,13 @@ docker-compose down  # Keeps data and config
 
 ## Troubleshooting
 
+### Volume mount error (WSL/Docker Desktop)?
+```bash
+# Fix file ownership
+sudo chown -R $USER:$USER config data
+docker compose down && docker compose up -d
+```
+
 ### Container not starting?
 ```bash
 docker-compose logs mailuptime

@@ -31,6 +31,15 @@ echo ""
 echo "Creating directory structure..."
 mkdir -p config data
 
+# Ensure current user owns the directories (prevent Docker mount issues)
+if [ -d "config" ]; then
+    sudo chown -R $USER:$USER config 2>/dev/null || chown -R $USER:$USER config
+fi
+
+if [ -d "data" ]; then
+    sudo chown -R $USER:$USER data 2>/dev/null || chown -R $USER:$USER data
+fi
+
 # Check if config file exists
 if [ -f "config/appsettings.json" ]; then
     echo "? Configuration file found: config/appsettings.json"
@@ -79,10 +88,22 @@ fi
 
 echo ""
 echo "Setting file permissions..."
+
+# Ensure current user owns the directories and files (critical for Docker volume mounts)
+if [ -d "config" ]; then
+    sudo chown -R $USER:$USER config 2>/dev/null || chown -R $USER:$USER config
+fi
+
+if [ -d "data" ]; then
+    sudo chown -R $USER:$USER data 2>/dev/null || chown -R $USER:$USER data
+fi
+
+# Set appropriate permissions
 chmod 600 config/appsettings.json
+chmod 755 config
 chmod 755 data
 
-echo "? Permissions set"
+echo "? Permissions set (owner: $USER)"
 echo ""
 
 # Check if container is already running

@@ -354,6 +354,32 @@ Common issues:
 - **Port already in use**: Change external port in `docker-compose.yml`
 - **Config file not found**: Ensure `config/appsettings.json` exists
 - **Permission denied**: Check file permissions and SELinux/AppArmor settings
+- **Volume mount error (WSL/Docker Desktop)**: See [File Permission Issues](#file-permission-issues-wsldocker-desktop) below
+
+### File Permission Issues (WSL/Docker Desktop)
+
+**Symptom:**
+```
+error mounting "..." to rootfs at "/app/appsettings.json": no such file or directory
+```
+
+**Cause:** The `config/` and `data/` directories or files are owned by root, but Docker needs to mount them as your user.
+
+**Solution:**
+```bash
+# Fix ownership (run from the directory containing docker-compose.yml)
+sudo chown -R $USER:$USER config data
+
+# Restart container
+docker compose down
+docker compose up -d
+```
+
+**Prevention:** Always run the setup script with your regular user (not sudo):
+```bash
+./docker-setup.sh  # Correct
+# sudo ./docker-setup.sh  # Wrong - will create root-owned files
+```
 
 ### Database Locked Error
 

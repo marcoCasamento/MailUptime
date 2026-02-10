@@ -40,11 +40,13 @@ This project uses GitHub Actions for continuous integration and Docker image pub
 - Updates Docker Hub repository description
 
 **Tags Generated:**
-- `latest` (for default branch)
+- `latest` (for releases and master branch)
 - `v1.2.3` (full semantic version)
 - `v1.2` (major.minor)
 - `v1` (major version)
-- `main-<sha>` (branch + commit SHA)
+- `sha-abc1234` (commit SHA)
+
+For detailed tagging strategy, see **[DOCKER_TAGGING.md](DOCKER_TAGGING.md)**
 
 **Status Badge:**
 ```markdown

@@ -45,7 +45,7 @@ public class MailUptimeService : IMailUptimeService
             _logger.LogWarning("No record found for mailbox: {MailboxName} on {Date}", mailboxName, today);
             return new MailCheckResult
             {
-                Error = "Mailbox not found or not yet checked today"
+                Error = "Mail not found or Mailbox not yet checked today"
             };
         }
 

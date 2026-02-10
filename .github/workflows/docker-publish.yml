@@ -42,7 +42,7 @@ jobs:
           type=semver,pattern={{major}}
           type=ref,event=branch
           type=sha
-          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=latest,enable=${{ github.event_name == 'release' || github.ref == 'refs/heads/master' }}
           
     - name: Build and push Docker image
       uses: docker/build-push-action@v6
