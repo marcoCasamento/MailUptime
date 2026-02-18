@@ -68,14 +68,21 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 2000px;
             margin: 0 auto;
+        }
+
+        /* For ultra-wide screens, allow even more columns */
+        @media (min-width: 2400px) {
+            .container {
+                max-width: 2800px;
+            }
         }
 
         header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 20px 0;
+            margin-bottom: 30px;
+            padding: 16px 0;
         }
 
         h1 {
@@ -104,16 +111,61 @@
             justify-content: space-between;
             align-items: center;
             background: var(--bg-card);
-            padding: 16px 24px;
-            border-radius: 10px;
-            margin-bottom: 24px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 18px;
             border: 1px solid var(--border-color);
             box-shadow: 0 2px 8px var(--shadow);
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
-        .refresh-info span {
+        .refresh-info-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .refresh-info-left span {
             color: var(--text-secondary);
             font-size: 0.95rem;
+        }
+
+        .sort-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sort-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .sort-select {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .sort-select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .sort-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(92, 221, 139, 0.2);
         }
 
         .refresh-btn {
@@ -142,15 +194,15 @@
 
         .mailbox-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
         }
 
         .mailbox-card {
             background: var(--bg-card);
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 8px;
+            padding: 14px;
             border: 1px solid var(--border-color);
             transition: all 0.2s ease;
             position: relative;
@@ -162,18 +214,76 @@
             border-color: var(--primary-color);
         }
 
+        /* Status-based backgrounds */
+        .mailbox-card.status-success {
+            background: linear-gradient(135deg, rgba(103, 194, 58, 0.15) 0%, rgba(103, 194, 58, 0.08) 100%);
+            border-color: rgba(103, 194, 58, 0.4);
+        }
+
+        .mailbox-card.status-warning {
+            background: linear-gradient(135deg, rgba(230, 162, 60, 0.15) 0%, rgba(230, 162, 60, 0.08) 100%);
+            border-color: rgba(230, 162, 60, 0.4);
+        }
+
+        .mailbox-card.status-error {
+            background: linear-gradient(135deg, rgba(245, 108, 108, 0.15) 0%, rgba(245, 108, 108, 0.08) 100%);
+            border-color: rgba(245, 108, 108, 0.4);
+        }
+
+        [data-bs-theme="dark"] .mailbox-card.status-success {
+            background: linear-gradient(135deg, rgba(103, 194, 58, 0.2) 0%, rgba(103, 194, 58, 0.1) 100%);
+            border-color: rgba(103, 194, 58, 0.5);
+        }
+
+        [data-bs-theme="dark"] .mailbox-card.status-warning {
+            background: linear-gradient(135deg, rgba(230, 162, 60, 0.2) 0%, rgba(230, 162, 60, 0.1) 100%);
+            border-color: rgba(230, 162, 60, 0.5);
+        }
+
+        [data-bs-theme="dark"] .mailbox-card.status-error {
+            background: linear-gradient(135deg, rgba(245, 108, 108, 0.2) 0%, rgba(245, 108, 108, 0.1) 100%);
+            border-color: rgba(245, 108, 108, 0.5);
+        }
+
         .mailbox-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .mailbox-header:hover .expand-icon {
+            color: var(--primary-color);
+        }
+
+        .mailbox-title {
+            flex: 1;
+            min-width: 0;
         }
 
         .mailbox-name {
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text-primary);
             word-break: break-word;
+            margin-bottom: 4px;
+        }
+
+        .mailbox-subject {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mailbox-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .status-badge {
@@ -186,6 +296,19 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .expand-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--text-muted);
+            transition: transform 0.3s ease, color 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .expand-icon.expanded {
+            transform: rotate(180deg);
         }
 
         .status-badge.success {
@@ -203,22 +326,33 @@
             color: #ffffff;
         }
 
+        .mailbox-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .mailbox-details.expanded {
+            max-height: 1000px;
+        }
+
         .info-section {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            margin-top: 12px;
         }
 
         .info-label {
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             font-weight: 600;
         }
 
         .info-value {
             color: var(--text-primary);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 400;
         }
 
@@ -228,30 +362,30 @@
         }
 
         .check-items {
-            margin-top: 16px;
-            padding-top: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid var(--border-color);
         }
 
         .check-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-            padding: 8px 12px;
+            gap: 8px;
+            margin-bottom: 6px;
+            padding: 6px 10px;
             background: var(--bg-secondary);
             border-radius: 6px;
             border: 1px solid var(--border-color);
         }
 
         .check-icon {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             flex-shrink: 0;
         }
@@ -278,7 +412,7 @@
 
         .check-text {
             flex: 1;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
         }
 
@@ -286,11 +420,11 @@
             background: rgba(245, 108, 108, 0.1);
             border: 1px solid var(--error-color);
             border-radius: 6px;
-            padding: 12px;
-            margin-top: 12px;
+            padding: 10px;
+            margin-top: 10px;
             color: var(--error-color);
-            font-size: 0.875rem;
-            line-height: 1.5;
+            font-size: 0.8rem;
+            line-height: 1.4;
         }
 
         .loading {
@@ -339,15 +473,15 @@
         .sender-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
+            gap: 6px;
+            margin-top: 6px;
         }
 
         .sender-tag {
             background: var(--bg-secondary);
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             border: 1px solid var(--border-color);
         }
@@ -400,7 +534,23 @@
             .refresh-info {
                 flex-direction: column;
                 gap: 12px;
+                align-items: stretch;
+            }
+
+            .refresh-info-left {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
                 text-align: center;
+            }
+
+            .sort-control {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sort-select {
+                width: 100%;
             }
 
             .mailbox-header {
@@ -441,7 +591,16 @@
         </header>
 
         <div class="refresh-info">
-            <span id="lastUpdate">Loading...</span>
+            <div class="refresh-info-left">
+                <span id="lastUpdate">Loading...</span>
+                <div class="sort-control">
+                    <label class="sort-label" for="sortSelect">Sort by:</label>
+                    <select id="sortSelect" class="sort-select" onchange="updateSortPreference()">
+                        <option value="status">Status</option>
+                        <option value="name">Name</option>
+                    </select>
+                </div>
+            </div>
             <button class="refresh-btn" onclick="loadMailboxes()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
@@ -481,6 +640,64 @@
 
     <script>
         let autoRefreshInterval;
+
+        // Sort preference management
+        function getSortPreference() {
+            return localStorage.getItem('sortPreference') || 'status';
+        }
+
+        function updateSortPreference() {
+            const sortSelect = document.getElementById('sortSelect');
+            const sortValue = sortSelect.value;
+            localStorage.setItem('sortPreference', sortValue);
+            loadMailboxes(); // Re-render with new sort
+        }
+
+        function initSortPreference() {
+            const savedSort = getSortPreference();
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.value = savedSort;
+            }
+        }
+
+        function getStatusPriority(mailbox) {
+            // Error/Failed = 0 (highest priority, shown first)
+            // Warning/Pending = 1
+            // Success/Up = 2 (lowest priority, shown last)
+            if (mailbox.error || (mailbox.patternMatched && mailbox.failPatternMatched)) {
+                return 0;
+            } else if (mailbox.patternMatched) {
+                return 2;
+            } else {
+                return 1;
+            }
+        }
+
+        function sortMailboxes(mailboxes) {
+            const sortPreference = getSortPreference();
+            const sorted = [...mailboxes];
+
+            if (sortPreference === 'status') {
+                // Sort by status priority first, then alphabetically by name
+                sorted.sort((a, b) => {
+                    const priorityA = getStatusPriority(a);
+                    const priorityB = getStatusPriority(b);
+                    
+                    if (priorityA !== priorityB) {
+                        return priorityA - priorityB;
+                    }
+                    
+                    // Same priority, sort alphabetically
+                    return a.name.localeCompare(b.name);
+                });
+            } else if (sortPreference === 'name') {
+                // Sort alphabetically by name
+                sorted.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+            return sorted;
+        }
 
         // Theme management
         function toggleTheme() {
@@ -559,7 +776,16 @@
             return '<div class="check-icon na">○</div>';
         }
 
-        function renderMailbox(mailbox) {
+        function toggleMailbox(cardId) {
+            const card = document.getElementById(cardId);
+            const details = card.querySelector('.mailbox-details');
+            const icon = card.querySelector('.expand-icon');
+            
+            details.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
+
+        function renderMailbox(mailbox, index) {
             const hasSenders = mailbox.hasSenderConfiguration && mailbox.expectedSenders.length > 0;
             const sendersHtml = hasSenders ? `
                 <div class="sender-list">
@@ -575,74 +801,99 @@
                 </div>
             ` : '';
 
+            // Determine status class for background color
+            let statusClass = '';
+            if (mailbox.error || (mailbox.patternMatched && mailbox.failPatternMatched)) {
+                statusClass = 'status-error';
+            } else if (mailbox.patternMatched) {
+                statusClass = 'status-success';
+            } else {
+                statusClass = 'status-warning';
+            }
+
+            const cardId = `mailbox-${index}`;
+            const displaySubject = mailbox.lastMatchedSubject || 
+                                   (mailbox.failPatternMatched && mailbox.lastFailedSubject) || 
+                                   'No subject yet';
+
             return `
-                <div class="mailbox-card">
-                    <div class="mailbox-header">
-                        <h2 class="mailbox-name">${mailbox.name}</h2>
-                        ${getStatusBadge(mailbox)}
+                <div class="mailbox-card ${statusClass}" id="${cardId}">
+                    <div class="mailbox-header" onclick="toggleMailbox('${cardId}')">
+                        <div class="mailbox-title">
+                            <div class="mailbox-name">${mailbox.name}</div>
+                            <div class="mailbox-subject">${displaySubject}</div>
+                        </div>
+                        <div class="mailbox-header-right">
+                            ${getStatusBadge(mailbox)}
+                            <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
                     </div>
 
-                    <div class="info-section">
-                        <div class="info-label">Last Check</div>
-                        <div class="info-value time">${formatDateTime(mailbox.lastChecked)}</div>
-                    </div>
-
-                    ${mailbox.lastReceivedDate ? `
+                    <div class="mailbox-details">
                         <div class="info-section">
-                            <div class="info-label">Last Received</div>
-                            <div class="info-value time">${formatDateTime(mailbox.lastReceivedDate)}</div>
+                            <div class="info-label">Last Check</div>
+                            <div class="info-value time">${formatDateTime(mailbox.lastChecked)}</div>
                         </div>
-                    ` : ''}
 
-                    ${mailbox.lastMatchedSubject ? `
-                        <div class="info-section">
-                            <div class="info-label">Last Subject</div>
-                            <div class="info-value">${mailbox.lastMatchedSubject}</div>
-                        </div>
-                    ` : ''}
-
-                    ${mailbox.failPatternMatched && mailbox.lastFailedSubject ? `
-                        <div class="info-section">
-                            <div class="info-label" style="color: var(--error-color);">⚠ Failed Report Subject</div>
-                            <div class="info-value" style="color: var(--error-color);">${mailbox.lastFailedSubject}</div>
-                        </div>
-                    ` : ''}
-
-                    ${hasSenders ? `
-                        <div class="info-section">
-                            <div class="info-label">Expected Senders</div>
-                            ${sendersHtml}
-                        </div>
-                    ` : ''}
-
-                    <div class="check-items">
-                        ${mailbox.patternMatched ? `
-                            <div class="check-item">
-                                ${getCheckIcon(true)}
-                                <span class="check-text">Report Received</span>
+                        ${mailbox.lastReceivedDate ? `
+                            <div class="info-section">
+                                <div class="info-label">Last Received</div>
+                                <div class="info-value time">${formatDateTime(mailbox.lastReceivedDate)}</div>
                             </div>
-                        ` : `
-                            <div class="check-item">
-                                ${getCheckIcon(false)}
-                                <span class="check-text">Report not yet received</span>
+                        ` : ''}
+
+                        ${mailbox.lastMatchedSubject ? `
+                            <div class="info-section">
+                                <div class="info-label">Last Subject</div>
+                                <div class="info-value">${mailbox.lastMatchedSubject}</div>
                             </div>
-                        `}
+                        ` : ''}
+
+                        ${mailbox.failPatternMatched && mailbox.lastFailedSubject ? `
+                            <div class="info-section">
+                                <div class="info-label" style="color: var(--error-color);">⚠ Failed Report Subject</div>
+                                <div class="info-value" style="color: var(--error-color);">${mailbox.lastFailedSubject}</div>
+                            </div>
+                        ` : ''}
+
+                        ${hasSenders ? `
+                            <div class="info-section">
+                                <div class="info-label">Expected Senders</div>
+                                ${sendersHtml}
+                            </div>
+                        ` : ''}
+
+                        <div class="check-items">
+                            ${mailbox.patternMatched ? `
+                                <div class="check-item">
+                                    ${getCheckIcon(true)}
+                                    <span class="check-text">Report Received</span>
+                                </div>
+                            ` : `
+                                <div class="check-item">
+                                    ${getCheckIcon(false)}
+                                    <span class="check-text">Report not yet received</span>
+                                </div>
+                            `}
+                            
+                            ${mailbox.failPatternMatched ? `
+                                <div class="check-item">
+                                    ${getCheckIcon(true)}
+                                    <span class="check-text" style="color: var(--error-color); font-weight: 600;">⚠ Failing Report Received</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        ${errorHtml}
                         
                         ${mailbox.failPatternMatched ? `
-                            <div class="check-item">
-                                ${getCheckIcon(true)}
-                                <span class="check-text" style="color: var(--error-color); font-weight: 600;">⚠ Failing Report Received</span>
+                            <div class="error-message" style="background: rgba(239, 68, 68, 0.15); border-color: var(--error-color);">
+                                <strong>⚠ Failure Detected:</strong> This report contains failure patterns indicating an issue that needs attention.
                             </div>
                         ` : ''}
                     </div>
-
-                    ${errorHtml}
-                    
-                    ${mailbox.failPatternMatched ? `
-                        <div class="error-message" style="background: rgba(239, 68, 68, 0.15); border-color: var(--error-color);">
-                            <strong>⚠ Failure Detected:</strong> This report contains failure patterns indicating an issue that needs attention.
-                        </div>
-                    ` : ''}
                 </div>
             `;
         }
@@ -672,7 +923,8 @@
                         </div>
                     `;
                 } else {
-                    container.innerHTML = mailboxes.map(renderMailbox).join('');
+                    const sortedMailboxes = sortMailboxes(mailboxes);
+                    container.innerHTML = sortedMailboxes.map((mailbox, index) => renderMailbox(mailbox, index)).join('');
                 }
                 
                 document.getElementById('lastUpdate').textContent = 
@@ -699,6 +951,7 @@
 
         // Initialize theme and load data
         initTheme();
+        initSortPreference();
         loadMailboxes();
 
         // Auto-refresh every 30 seconds
